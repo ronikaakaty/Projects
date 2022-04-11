@@ -1,0 +1,120 @@
+---
+title: '10.1 Final Project: Cardiovascular Disease Predictor'
+author: "Roni Kaakaty"
+date: "8/6/2020"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+  Cardiovascular disease is the leading cause of death in the World. According to the CDC, 80% of these deaths are preventable. I wanted to examine what factors would be able to accurately predict if an individual is at risk of being diagnosed with cardiovascular disease based on certain factors. By knowing which factors contribute the most to a positive diagnosis, patients would be able to get an early indication of what conditions need to improve to improve their chances of avoiding a tragic event. 
+  
+  
+  Utilizing the Framingham dataset located on Kaggle, I was able to test various variables to see which would or wouldn't have a significant impact in predicting a possible cardiovascular even within the next 10 years. I first wanted to identify if there would be a drastic difference between males and females and if the variables impacted one more greatly than the other. I found that men were more likely to experience a cardiac event by a factor of 0.535621. Since the other variables seemed to impact the individual almost the same (not dependent on gender), I decided to incorporate both into my logistic regression model instead of producing two separate models. With the use of the logistic regression model, I was able to eliminate variables that had no significance on the output. These included education, current smoker, BP meds, diabetes, diastolic bp, BMI, and heart rate. BMI made sense to remove since that isn't the best reflection of an individual's body composition. The interesting thing to me was the model implied that glucose was a significant variable, but diabetes was not. I assumed they were correlated, but the logistic model stated otherwise based on the data.
+  
+  
+  The variables that showed the most significance were gender, age, cigarettes per day, prevalent hypertension, total cholesterol, systolic bp, and glucose. Individuals with prevalent hypertension had increased odds of a cardiovascular event by a factor of 0.234235. This aligns with what I assumed would be the case when I first began this project. It makes sense that individuals who struggle with blood pressure are the most at risk, especially if they aren't currently using blood pressure medication to try to limit their risk as much as possible. I was able to create a prediction model that would be able to predict whether or not the individual would experience a cardiovascular event with an accuracy of 85%. 
+  
+  
+  If someone were to replicate my study, I would try to locate a dataset with even more applicable variables such as family history, time spent exercising on a weekly basis, and profession (office job/active job). Individuals with high BMIs don't automatically make them "overweight" as that also depends on their body composition. I also wonder if demographic played a role at all since this was limited to one area in the nation.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Load the libraries that will be used
+```{r}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(foreign)
+library(class)
+library(GGally)
+```
+## Set directory
+```{r}
+setwd("/Users/Roni Kaakaty/Documents/Github/dsc520")
+```
+## Open up dataset
+```{r}
+cardiovascular_df <- read.csv("data/cardio-dataset.csv")
+```
+
+## Convert variables to factors
+```{r}
+cardiovascular_df$education <- as.factor(cardiovascular_df$education)
+cardiovascular_df$currentSmoker <- as.factor(cardiovascular_df$currentSmoker)
+cardiovascular_df$BPMeds <- as.factor(cardiovascular_df$BPMeds)
+cardiovascular_df$prevalentHyp <- as.factor(cardiovascular_df$prevalentHyp)
+cardiovascular_df$diabetes <- as.factor(cardiovascular_df$diabetes)
+```
+
+## Remove NA values from dataset
+```{r}
+cardiovascular_df2 <- na.omit(cardiovascular_df)
+```
+## Clean up the data so that 0 reflects F and 1 reflects M. Replace 0 with No and 1 with Yes.
+```{r}
+cardiovascular_df2[cardiovascular_df2$gender == 0,]$gender <- "F"
+cardiovascular_df2[cardiovascular_df2$gender == 1,]$gender <- "M"
+
+cardiovascular_df2[cardiovascular_df2$TenYearCHD == 0,]$TenYearCHD <- "No"
+cardiovascular_df2[cardiovascular_df2$TenYearCHD == 1,]$TenYearCHD <- "Yes"
+
+cardiovascular_df2$gender <- as.factor(cardiovascular_df2$gender)
+cardiovascular_df2$TenYearCHD <- as.factor(cardiovascular_df2$TenYearCHD)
+```
+
+## Verify all variables are appropriate.
+```{r}
+str(cardiovascular_df2)
+```
+## Confirm that there is enough data to run Male/Female in the same model.
+```{r}
+xtabs(~TenYearCHD + gender, data = cardiovascular_df2)
+```
+## Create Logistic Regression Model with just gender
+
+```{r}
+cardio_gender <- glm(TenYearCHD ~ gender, data = cardiovascular_df2, family = "binomial")
+summary(cardio_gender)
+```
+## Create a Logistic Regression Model with all variables.
+
+```{r}
+cardio_log <- glm(TenYearCHD ~., data = cardiovascular_df2, family = "binomial")
+summary(cardio_log)
+```
+## Remove variables without significance from function.
+```{r}
+cardio_log2 <- glm(TenYearCHD~ gender + age + cigsPerDay + prevalentHyp + totChol + sysBP + glucose, data = cardiovascular_df2, family = "binomial")
+summary(cardio_log2)
+```
+## Removed variables without significance from dataset.
+
+```{r}
+cardiovascular_df3 <-cardiovascular_df2[, -c(3,4,6,8,11,12,13)]
+```
+
+## Train and Test a model
+```{r}
+##install.packages("caTools")
+library(caTools)
+set.seed(9850)
+cardio_split <- sample.split(cardiovascular_df3$TenYearCHD, SplitRatio = 0.7)
+cardio_train <- subset(cardiovascular_df3, cardio_split == TRUE)
+cardio_test <- subset(cardiovascular_df3, cardio_split == FALSE )
+```
+
+## Create prediction model 
+```{r}
+library(caret)
+cardio_predict <- predict(cardio_log2, type = "response", newdata = cardio_test)
+```
+
+## Determine accuracy of prediction model
+```{r}
+cardio_acc <- table(cardio_test$TenYearCHD, cardio_predict >= 0.5)
+accuracy <- sum(diag(cardio_acc))/sum(cardio_acc) * 100
+accuracy
+```
+

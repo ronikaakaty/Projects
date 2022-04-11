@@ -1,0 +1,60 @@
+---
+title: "3.2 Assignment: Dodgers Marketing"
+author: "Roni Kaakaty"
+date: "6/26/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Users/Roni Kaakaty/Documents/Github/DSC630")
+getwd()
+```
+```{r echo=FALSE}
+library(ggplot2)
+```
+```{r echo=FALSE}
+df <- read.csv("dodgers.csv")
+```
+```{r include=FALSE}
+mod<- lm(attend ~ month + day_of_week + bobblehead, data = df)
+summary(mod)
+```
+
+The goal of this assignment is determining the best day to run a marketing promotion to increase attendance at a Los Angeles Dodgers game. There are a few questions I need to answer before deciding on what my recommendation would be.My assumption is that the best day to do a promotion would be a mid-week night game during the summer months, so that families can go to the game together. I will need to see if the data validates that assumption. 
+
+What was the Dodgers record in the 2010 and 2011 season?
+
+This is important because it will give me an idea of whether or not the Dodgers were expected to be good in 2012. A team expected to be good, typically would have steady attendance all year and would possibly spike closer to playoff time. A team not expected to make the playoffs on the otherhand, will typically only have good attendance numbers the first few months of the season. Since marketing campaigns are done before the year starts, I need to make sure I have an idea where the team stands. In 2010, the Dodgers finished the year with an 80-82 record. In 2011, they finished with an 82-79 record. While not great, the Dodgers fielded a competitive team, so I shouldn't automatically eliminate a month yet. 
+
+Do fans prefer day or night games?
+
+Based on my Python analysis, day games are favored over night games except on Sundays. Day games draw a bigger crowd regardless, so for the promotion I would rather schedule it for a night game in order to improve ticket sales.I also found that Monday was the day of the week on average with the fewest amount of fans. June, on average, had the most amount of fans and then attendance tapered off. May was a down month in terms of attendance, so that is the month I am targeting. 
+
+Which promotion led to the most increase in fans?
+
+The bobble-head promotion led to the greatest increase of fans compared to the average ticket sales that day without a promotion. The item that had the least attendance bump was the cap. My linear model found that the bobble-head promotion added on average 10,715 more fans. 
+
+Did the opposing team factor into the size of the crowd?
+
+The biggest attendance numbers came from opening day, the rival Angels, and big market teams. The day I identify to use the promotion on should involve a small market team. 
+
+
+```{r echo=FALSE}
+p <- ggplot(df, aes(x=attend/1000, y=opponent, color=day_night)) + 
+        geom_point() + 
+        ggtitle("Dodgers Attendance By Opponent") +
+        theme(plot.title = element_text(lineheight=3, face="bold", color="black", size=10)) +
+        xlab("Attendance (Thousands)") +
+        ylab("Opposing Team")
+p + theme(legend.title = element_blank())
+
+```
+
+What role did temperature play in attendance?
+
+The best months for weather coincided with the biggest jump in attendance. Fans in Los Angeles loved attending games when the temperature is in the 70s. However, because these are also the summer months when kids are out of school, I didn't want to contribute that increase in attendance solely on temperature. 
+
+Conclusion:
+
+Based on my Python and R code and if no other promotions were already scheduled, the day I would select would be Monday, May 14 against the Snakes (Diamondbacks). I picked this day because it checks all the boxes. It's in the month with the lowest attendance, on the day with the lowest attendance on average, and against a small market team. The promotional item I would select is the bobble-head. It's also early enough in the season to where the hope and expectation from the team hasn't worn off. The month of September would have been another great option, but I didn't want to risk the team falling out of playoff contention and thus fans would have lost interest by then.
