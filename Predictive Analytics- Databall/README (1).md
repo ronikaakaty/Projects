@@ -1,4 +1,0 @@
-
-# Databall - Utilizing Machine Learning to Identify Market Opportunities in Baseball
-
-This project stemmed from the movie Moneyball, which brought analytics to the forefront in the sport's industry. Moneyball was about a small market baseball team identifying certain attributes of players that were undervalued in the market at that time using analytics. Databall aims to build on those concepts by using machine learning models to identify additional undervalued attributes that have come out since the release of that film to see if they stand the test of time. This project puts less emphasis on traditionalist stats and instead aims to identify advanced metrics that can provide more value to ball clubs and translate to more success on the field. 
